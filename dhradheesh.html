@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>AI Multi Game Project</title>
+  <style>
+    body {
+      font-family: Arial;
+      text-align: center;
+      background: #eef;
+      padding: 20px;
+    }
+    button {
+      padding: 10px 15px;
+      margin: 5px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+    .game {
+      display: none;
+      margin-top: 20px;
+    }
+    table {
+      margin: auto;
+    }
+    td {
+      width: 60px;
+      height: 60px;
+      font-size: 30px;
+      border: 2px solid black;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+
+<h1>🤖 AI Multi Game Project</h1>
+<p>By bujju (Class 8/9)</p>
+
+<button onclick="showGame('number')">🔢 Guess My Number</button>
+<button onclick="showGame('ttt')">❌⭕ Tic Tac Toe (AI)</button>
+<button onclick="showGame('quiz')">🧠 Quiz</button>
+
+<!-- ================= NUMBER GAME ================= -->
+<div id="number" class="game">
+  <h2>AI Guess My Number</h2>
+  <p>Think of a number between 1 and 100</p>
+  <h3 id="aiGuess">50</h3>
+  <button onclick="tooLow()">Too Low</button>
+  <button onclick="correct()">Correct</button>
+  <button onclick="tooHigh()">Too High</button>
+</div>
+
+<!-- ================= TIC TAC TOE ================= -->
+<div id="ttt" class="game">
+  <h2>Tic Tac Toe (You ❌ vs AI ⭕)</h2>
+  <table>
+    <tr>
+      <td onclick="playTTT(0)"></td>
+      <td onclick="playTTT(1)"></td>
+      <td onclick="playTTT(2)"></td>
+    </tr>
+    <tr>
+      <td onclick="playTTT(3)"></td>
+      <td onclick="playTTT(4)"></td>
+      <td onclick="playTTT(5)"></td>
+    </tr>
+    <tr>
+      <td onclick="playTTT(6)"></td>
+      <td onclick="playTTT(7)"></td>
+      <td onclick="playTTT(8)"></td>
+    </tr>
+  </table>
+  <p id="tttResult"></p>
+</div>
+
+<!-- ================= QUIZ ================= -->
+<div id="quiz" class="game">
+  <h2>Quiz (Class 8–9)</h2>
+  <p id="question"></p>
+  <button onclick="answerQuiz(true)">True</button>
+  <button onclick="answerQuiz(false)">False</button>
+  <p id="quizScore"></p>
+</div>
+
+<script>
+/* ================= MENU ================= */
+function showGame(id) {
+  document.querySelectorAll('.game').forEach(g => g.style.display = "none");
+  document.getElementById(id).style.display = "block";
+}
+
+/* ================= AI GUESS NUMBER ================= */
+let low = 1, high = 100, guess = 50;
+function updateGuess() {
+  guess = Math.floor((low + high) / 2);
+  document.getElementById("aiGuess").innerText = guess;
+}
+function tooLow() { low = guess + 1; updateGuess(); }
+function tooHigh() { high = guess - 1; updateGuess(); }
+function correct() { alert("🎉 AI guessed your number: " + guess); }
+
+/* ================= TIC TAC TOE (FIXED) ================= */
+let board = ["","","","","","","","",""];
+let gameOver = false;
+
+const winPatterns = [
+  [0,1,2],[3,4,5],[6,7,8],
+  [0,3,6],[1,4,7],[2,5,8],
+  [0,4,8],[2,4,6]
+];
+
+function playTTT(i) {
+  if (board[i] !== "" || gameOver) return;
+
+  board[i] = "X";
+  drawBoard();
+
+  if (checkWinner("X")) {
+    document.getElementById("tttResult").innerText = "🎉 You Win!";
+    gameOver = true;
+    return;
+  }
+
+  if (board.includes("")) {
+    aiMove();
+    drawBoard();
+
+    if (checkWinner("O")) {
+      document.getElementById("tttResult").innerText = "🤖 AI Wins!";
+      gameOver = true;
+      return;
+    }
+  }
+
+  if (!board.includes("") && !gameOver) {
+    document.getElementById("tttResult").innerText = "🤝 Draw!";
+    gameOver = true;
+  }
+}
+
+function aiMove() {
+  let empty = board.map((v,i)=>v==""?i:null).filter(v=>v!==null);
+  let move = empty[Math.floor(Math.random()*empty.length)];
+  board[move] = "O";
+}
+
+function drawBoard() {
+  document.querySelectorAll("td").forEach((c,i)=>c.innerText = board[i]);
+}
+
+function checkWinner(player) {
+  return winPatterns.some(p =>
+    board[p[0]]===player &&
+    board[p[1]]===player &&
+    board[p[2]]===player
+  );
+}
+
+/* ================= QUIZ ================= */
+let questions = [
+  ["The SI unit of force is Newton.", true],
+  ["The speed of light is about 3 × 10⁸ m/s.", true],
+  ["Earth has two natural satellites.", false],
+  ["The pH value of acids is less than 7.", true],
+  ["RAM is non-volatile memory.", false],
+  ["Binary number system uses base 2.", true],
+  ["Ohm’s law is V = IR.", true],
+  ["HTML is used to structure web pages.", true],
+  ["The boiling point of water is 90°C.", false],
+  ["CPU is the brain of the computer.", true],
+  ["The SI unit of pressure is Pascal.", true],
+  ["Sound cannot travel in vacuum.", true],
+  ["Photosynthesis happens in chloroplast.", true],
+  ["LAN stands for Local Area Network.", true],
+  ["π value is approximately 3.14.", true]
+];
+
+// repeat until 100+
+while (questions.length < 100) {
+  questions.push(questions[Math.floor(Math.random()*15)]);
+}
+
+let qi = 0, score = 0;
+document.getElementById("question").innerText = questions[0][0];
+
+function answerQuiz(ans) {
+  if (ans === questions[qi][1]) score++;
+  qi++;
+  document.getElementById("question").innerText = questions[qi][0];
+  document.getElementById("quizScore").innerText =
+    "Score: " + score + " / " + qi;
+}
+</script>
+
+</body>
+</html>
